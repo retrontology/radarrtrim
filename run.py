@@ -16,23 +16,21 @@ def patch_ssl():
 
 def remove_watched_movies_from_radarr(plex:PlexServer, radarr:radarr_client):
     movies = radarr.get_movies()
+    history = plex.library.section('Movies').history()
     for movie in movies:
-        title = movie['title']
-        isWatched = None
-        try:
-            isWatched = plex.library.section('Movies').get(title).isWatched
-        except NotFound:
-            for alt_title in movie['alternateTitles']:
-                alt_title = alt_title['title']
-                try:
-                    isWatched = plex.library.section('Movies').get(alt_title).isWatched
-                    title = alt_title
-                    break
-                except NotFound:
-                    pass
-        if isWatched == True:
-            movie.delete()
-            radarr.delete_movie(movie['id'], deleteFiles=True)
+        titles = [movie['title']]
+        alt_titles = list(map(lambda x: x['title'], movie['alternateTitles']))
+        titles.extend(alt_titles)
+        for watched in history:
+            for title in titles:
+                if title == watched.title:
+                    radarr.delete_movie(movie['id'], deleteFiles=True)
+                    print(f'removed {movie["title"]} from radarr')
+                    try:
+                        plex.library.section('Movies').get(title).delete()
+                        print(f'removed {movie["title"]} from plex')
+                    except NotFound:
+                        pass
 
 def remove_watched_movies_from_plex(plex:PlexServer):
     movies = plex.library.section('Movies').all()
@@ -42,6 +40,7 @@ def remove_watched_movies_from_plex(plex:PlexServer):
             while not deleted:
                 try:
                     movie.delete()
+                    print(f'removed {movie.title} from plex')
                     deleted = True
                 except Exception as e:
                     print(e)
@@ -58,7 +57,8 @@ def main():
     plex = PlexServer(PLEX_BASE_URL, PLEX_TOKEN)
 
     # Trim
-    remove_watched_movies(plex, radarr)
+    #remove_watched_movies(plex, radarr)
+    radarr.search_for_missing_movies()
     
 
 if __name__ == '__main__':

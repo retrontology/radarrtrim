@@ -37,6 +37,16 @@ class radarr_client():
                 break
         return movies
     
+    def search_for_missing_movies(self):
+        self.post('/command', {'name': 'MissingMoviesSearch'})
+        #movies = self.get_movies()
+        #missing_ids = []
+        #for movie in movies:
+        #    if movie['monitored'] and movie['status'] == 'released' and not movie['hasFile']:
+        #        missing_ids.append(movie['id'])
+        #if len(missing_ids) > 0:
+        #    self.post('/command', {'name': 'MoviesSearch', 'movieIds': missing_ids})
+    
     def get(self, operation, **kwargs):
         response = self.session.get(
             url = self.get_url(operation),
@@ -55,6 +65,20 @@ class radarr_client():
         )
         match response.status_code:
             case 200:
+                return True
+            case _:
+                return False
+    
+    def post(self, operation, json, **kwargs):
+        response = self.session.post(
+            url = self.get_url(operation),
+            json=json,
+            params = kwargs
+        )
+        match response.status_code:
+            case 200:
+                return True
+            case 201:
                 return True
             case _:
                 return False
