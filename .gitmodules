@@ -1,0 +1,3 @@
+[submodule "reyaml"]
+	path = reyaml
+	url = https://github.com/retrontology/reyaml

@@ -1,0 +1,8 @@
+plex:
+  base_url: your plex.direct url
+  token: your plex auth token
+radarr:
+  api_key: your radarr api key
+  api_path: /api/v3
+  ip: 192.168.1.1
+  port: 7878

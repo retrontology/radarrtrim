@@ -1,15 +1,9 @@
-from os import remove
 from radarr_client import radarr_client
 from plexapi.myplex import PlexServer, NotFound
 import ssl
+from reyaml import yamlConf
 
-RADARR_API_KEY = 'your radarr api key'
-RADARR_IP = '192.168.1.1'
-RADARR_PORT = 7878
-RADARR_API_PATH = '/api/v3'
-
-PLEX_TOKEN = 'your plex auth token'
-PLEX_BASE_URL = 'your plex.direct url'
+CONFIG_FILE = 'config.yaml'
 
 def patch_ssl():
     ssl.match_hostname = lambda cert, hostname: True
@@ -50,11 +44,19 @@ def remove_watched_movies(plex:PlexServer, radarr:radarr_client):
     remove_watched_movies_from_plex(plex)
 
 def main():
+    # Load config
+    config = yamlConf(CONFIG_FILE)
+    config.save()
+    
+    # Patch SSL
     patch_ssl()
 
     # Clients
-    radarr = radarr_client(RADARR_IP, RADARR_PORT, RADARR_API_PATH, RADARR_API_KEY)
-    plex = PlexServer(PLEX_BASE_URL, PLEX_TOKEN)
+    radarr = radarr_client(config.radarr.ip,
+                           config.radarr.port,
+                           config.radarr.api_path, 
+                           config.radarr.api_key)
+    plex = PlexServer(config.plex.base_url, config.plex.token)
 
     # Trim
     remove_watched_movies(plex, radarr)
