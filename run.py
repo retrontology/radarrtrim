@@ -60,6 +60,7 @@ def main():
 
     # Trim
     remove_watched_movies(plex, radarr)
+    radarr.remove_deleted_movies_from_queue()
     radarr.search_for_missing_movies()
     
 

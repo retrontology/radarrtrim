@@ -70,6 +70,26 @@ class radarr_client():
             else:
                 page_number += 1
         return records
+
+    def remove_deleted_movies_from_queue(self):
+        queue = self.get_queue(includeUnknownMovieItems=True)
+        queue = list(filter(lambda x: 'movieId' not in x, queue))
+        queue = list(map(lambda x: x['id'], queue))
+        if len(queue) == 1:
+            self.remove_from_queue(queue[0])
+        elif len(queue) > 1:
+            self.remove_from_queue_bulk(queue)
+
+    def remove_from_queue(self, id, removeFromClient=True, blocklist=False):
+        return self.delete(f'/queue/{id}',
+                            removeFromClient=removeFromClient,
+                            blocklist=removeFromClient)
+
+    def remove_from_queue_bulk(self, ids, removeFromClient=True, blocklist=False):
+        return self.delete(f'/queue/bulk',
+                            json={'ids': ids},
+                            removeFromClient=removeFromClient,
+                            blocklist=blocklist)
     
     def get(self, operation, **kwargs):
         response = self.session.get(
@@ -82,9 +102,10 @@ class radarr_client():
             case _:
                 return response
     
-    def delete(self, operation, **kwargs):
+    def delete(self, operation, json=None, **kwargs):
         response = self.session.delete(
             url = self.get_url(operation),
+            json=json,
             params = kwargs
         )
         match response.status_code:
