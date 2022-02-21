@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 import requests
 import logging
 import re
@@ -6,6 +5,10 @@ import datetime
 
 DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 DATE_REGEX = '[0-9]{4}(-[0-9]{2}){2}T([0-9]{2}:){2}[0-9]{2}Z'
+DEFAULT_PAGE_SIZE = 20
+DEFAULT_SORT_DIRECTION = 'ascending'
+DEFAULT_QUEUE_SORT_KEY = 'timeLeft'
+DEFAULT_INCLUDE_UNKNOWN_MOVIE_ITEMS = True
 
 class radarr_client():
 
@@ -37,15 +40,36 @@ class radarr_client():
                 break
         return movies
     
+    def get_queue(self, pageSize = DEFAULT_PAGE_SIZE, sortDirection = DEFAULT_QUEUE_SORT_KEY, sortKey = DEFAULT_QUEUE_SORT_KEY, includeUnknownMovieItems = DEFAULT_INCLUDE_UNKNOWN_MOVIE_ITEMS):
+        return self.get_paginated_results('/queue', pageSize = pageSize, sortDirection = sortDirection, sortKey = sortKey, includeUnknownMovieItems = includeUnknownMovieItems)
+    
     def search_for_missing_movies(self):
-        self.post('/command', {'name': 'MissingMoviesSearch'})
-        #movies = self.get_movies()
-        #missing_ids = []
-        #for movie in movies:
-        #    if movie['monitored'] and movie['status'] == 'released' and not movie['hasFile']:
-        #        missing_ids.append(movie['id'])
-        #if len(missing_ids) > 0:
-        #    self.post('/command', {'name': 'MoviesSearch', 'movieIds': missing_ids})
+        #self.post('/command', {'name': 'MissingMoviesSearch'})
+        movies = self.get_movies()
+        queue = list(map(lambda x: x['movieId'], self.get_queue(includeUnknownMovieItems = False)))
+        missing = []
+        for movie in movies:
+            if movie['monitored'] and movie['status'] == 'released' and not movie['hasFile'] and movie['id'] not in queue:
+                missing.append(movie)
+        if len(missing) > 0:
+            missing_ids = list(map(lambda x: x['id'], missing))
+            missing_names = list(map(lambda x: x['title'], missing))
+            self.post('/command', {'name': 'MoviesSearch', 'movieIds': missing_ids})
+            print(f'Searching for: {", ".join(missing_names)}')
+    
+    def get_paginated_results(self, operation, **kwargs):
+        page_number = 1
+        page_end = False
+        records = []
+        while not page_end:
+            kwargs['page'] = page_number
+            results = self.get(operation, **kwargs)
+            records.extend(results['records'])
+            if results['page'] * results['pageSize'] >= results['totalRecords']:
+                page_end = True
+            else:
+                page_number += 1
+        return records
     
     def get(self, operation, **kwargs):
         response = self.session.get(
@@ -76,12 +100,11 @@ class radarr_client():
             params = kwargs
         )
         match response.status_code:
-            case 200:
-                return True
-            case 201:
-                return True
+            case 200 | 201:
+                return self.parse_json(response.json())
             case _:
-                return False
+                return response
+    
     
     @classmethod
     def parse_json(cls, obj):

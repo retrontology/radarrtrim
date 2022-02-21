@@ -57,7 +57,7 @@ def main():
     plex = PlexServer(PLEX_BASE_URL, PLEX_TOKEN)
 
     # Trim
-    #remove_watched_movies(plex, radarr)
+    remove_watched_movies(plex, radarr)
     radarr.search_for_missing_movies()
     
 
