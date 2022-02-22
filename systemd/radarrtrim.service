@@ -1,0 +1,15 @@
+[Unit]
+Description=Radarr Trim Script
+
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=retrontology
+Group=retrontology
+
+WorkingDirectory=/home/retrontology/git/radarrtrim/
+ExecStart=/usr/bin/python3 /home/retrontology/git/radarrtrim/run.py
+
+[Install]
+WantedBy=multi-user.target
