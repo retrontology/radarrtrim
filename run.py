@@ -18,7 +18,7 @@ def remove_watched_movies_from_radarr(plex:PlexServer, radarr:radarr_client):
         for watched in history:
             for title in titles:
                 if title == watched.title:
-                    radarr.delete_movie(movie['id'], deleteFiles=True)
+                    radarr.delete_movie(movie['id'], addImportExclusion=True, deleteFiles=True)
                     print(f'removed {movie["title"]} from radarr')
                     try:
                         plex.library.section('Movies').get(title).delete()
