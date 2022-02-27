@@ -12,7 +12,7 @@ def remove_watched_movies_from_radarr(plex:PlexServer, radarr:radarr_client):
     movies = radarr.get_movies()
     history = plex.library.section('Movies').history()
     for movie in movies:
-        titles = [movie['title']]
+        titles = [movie['title'], movie['originalTitle']]
         alt_titles = list(map(lambda x: x['title'], movie['alternateTitles']))
         titles.extend(alt_titles)
         for watched in history:
