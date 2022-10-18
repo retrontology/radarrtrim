@@ -1,7 +1,7 @@
 from radarr_client import radarr_client
 from plexapi.myplex import PlexServer, NotFound
 import ssl
-from reyaml import yamlConf
+from retroyaml import yamlConf
 
 CONFIG_FILE = 'config.yaml'
 
