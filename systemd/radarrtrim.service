@@ -8,7 +8,6 @@ After=network-online.target
 User=retrontology
 Group=retrontology
 
-WorkingDirectory=/home/retrontology/git/radarrtrim/
 ExecStart=/usr/bin/python3.10 /home/retrontology/git/radarrtrim/run.py
 
 [Install]
