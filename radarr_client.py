@@ -40,7 +40,7 @@ class radarr_client():
                 break
         return movies
     
-    def get_queue(self, pageSize = DEFAULT_PAGE_SIZE, sortDirection = DEFAULT_QUEUE_SORT_KEY, sortKey = DEFAULT_QUEUE_SORT_KEY, includeUnknownMovieItems = DEFAULT_INCLUDE_UNKNOWN_MOVIE_ITEMS):
+    def get_queue(self, pageSize = DEFAULT_PAGE_SIZE, sortDirection = DEFAULT_SORT_DIRECTION, sortKey = DEFAULT_QUEUE_SORT_KEY, includeUnknownMovieItems = DEFAULT_INCLUDE_UNKNOWN_MOVIE_ITEMS):
         return self.get_paginated_results('/queue', pageSize = pageSize, sortDirection = sortDirection, sortKey = sortKey, includeUnknownMovieItems = includeUnknownMovieItems)
     
     def get_queue_details(self, includeMovie=True):
