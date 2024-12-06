@@ -16,7 +16,7 @@ def remove_watched_movies(plex:PlexServer, radarr:radarr_client):
 
     watched_movies = list(
         filter(
-            lambda x: x.isWatched and x.userRating < RATING_CUTOFF, plex_movies
+            lambda x: x.isWatched and ( x.userRating == None or x.userRating < RATING_CUTOFF ), plex_movies
         )
     )
 
